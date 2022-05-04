@@ -38,6 +38,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+
 class User(AbstractBaseUser):
     email = models.EmailField(
         verbose_name='Email',

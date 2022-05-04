@@ -1,0 +1,1 @@
+This App shows example of Django's User Authentication System
