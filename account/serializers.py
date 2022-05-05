@@ -1,9 +1,12 @@
 from rest_framework import serializers
-from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
+from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
 
 from .models import User
+from.utils import Util
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -67,8 +70,16 @@ class SendPassResetMailSerializer(serializers.Serializer):
         if user:
             uid = urlsafe_base64_encode(force_bytes(user.id))
             token = PasswordResetTokenGenerator().make_token(user)
-            reset_link = f'http://127.0.0.1:3000/api/user/reset-pass/{uid}/{token}'
-            print(reset_link)
+            # 
+            reset_link = f'{settings.CORS_ALLOWED_ORIGINS[0]}/api/user/reset-pass/{uid}/{token}'
+            # print(reset_link)
+            # Send Mail
+            data = {
+                "subject" : "Reset Password",
+                "body":f'Your Password reset link is: {reset_link}',
+                "to": email
+            }
+            Util.send_email(data)
             return attrs
         else:
             raise serializers.ValidationError("Email is not registered.")
