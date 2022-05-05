@@ -9,7 +9,8 @@ from .serializers import (UserRegistrationSerializer,
                           UserLoginSerializer, 
                           UserProfileSerializer, 
                           UserChangePassSerializer,
-                          SendPassResetMailSerializer)
+                          SendPassResetMailSerializer,
+                          UserPassResetSerializer)
 from .renderers import UserRenderer
 
 
@@ -73,3 +74,11 @@ class SendPassResetMailApiView(APIView):
         serializer = SendPassResetMailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({'msg': 'Password reset mail sent successfully..!'}, status=status.HTTP_200_OK)
+
+
+class UserPassResetApiView(APIView):
+    renderer_classes = [UserRenderer]
+    def post(self, request, token, uid, format=None):
+        serializer = UserPassResetSerializer(data=request.data, context = {'uid': uid, 'token': token})
+        serializer.is_valid(raise_exception=True)
+        return Response({'msg': 'Password changed successfully..!'}, status=status.HTTP_200_OK)

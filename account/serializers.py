@@ -40,19 +40,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserChangePassSerializer(serializers.Serializer):
-    new_password = serializers.CharField(max_length=255, style= {'input_type': 'password'}, write_only=True)
-    new_password2 = serializers.CharField(max_length=255, style= {'input_type': 'password'}, write_only=True)
+    password = serializers.CharField(max_length=255, style= {'input_type': 'password'}, write_only=True)
+    password2 = serializers.CharField(max_length=255, style= {'input_type': 'password'}, write_only=True)
 
     class Meta:
-        fields = ['new_password', 'new_password2']
+        fields = ['password', 'password2']
     
     def validate(self, attrs):
-        new_password = attrs.get('new_password')
-        new_password2 = attrs.get('new_password2')
+        password = attrs.get('password')
+        password2 = attrs.get('password2')
         user = self.context.get('user')
-        if new_password != new_password2:
+        if password != password2:
             raise serializers.ValidationError("Passwords must match.")
-        user.set_password(new_password)
+        user.set_password(password)
         user.save()
         return attrs
 
@@ -67,11 +67,38 @@ class SendPassResetMailSerializer(serializers.Serializer):
         if user:
             uid = urlsafe_base64_encode(force_bytes(user.id))
             token = PasswordResetTokenGenerator().make_token(user)
-            reset_link = f'http://127.0.0.1:3000/api/user/reset/{uid}/{token}'
+            reset_link = f'http://127.0.0.1:3000/api/user/reset-pass/{uid}/{token}'
             print(reset_link)
             return attrs
         else:
             raise serializers.ValidationError("Email is not registered.")
+
+
+class UserPassResetSerializer(serializers.Serializer):
+    password = serializers.CharField(max_length=255, style= {'input_type': 'password'}, write_only=True)
+    password2 = serializers.CharField(max_length=255, style= {'input_type': 'password'}, write_only=True)
+
+    class Meta:
+        fields = ['password', 'password2']
+    
+    def validate(self, attrs):
+        try:
+            password = attrs.get('password')
+            password2 = attrs.get('password2')
+            uid = self.context.get('uid')
+            token = self.context.get('token')
+            if password != password2:
+                raise serializers.ValidationError("Passwords must match.")
+            id = smart_str(urlsafe_base64_decode(uid))
+            user = User.objects.get(id=id)
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                raise serializers.ValidationError("Invalid token.")
+            user.set_password(password)
+            user.save()
+            return attrs
+        except DjangoUnicodeDecodeError:
+            PasswordResetTokenGenerator().check_token(user, token)
+            raise serializers.ValidationError("Invalid token.")
         
 
         

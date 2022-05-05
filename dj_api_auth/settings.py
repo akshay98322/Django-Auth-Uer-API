@@ -153,3 +153,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+
+# Password reset timeout
+PASSWORD_RESET_TIMEOUT = 15 * 60
