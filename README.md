@@ -34,6 +34,13 @@ Install dependencies
   pip install requirements.txt
 ```
 
+Create DB and Tables
+
+```bash
+  python manage.py makemigrations
+  python manage.py migrate
+```
+
 Start the server
 
 ```bash
