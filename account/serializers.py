@@ -33,4 +33,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id','email', 'name']
+
+
+class UserChangePassSerializer(serializers.Serializer):
+    new_password = serializers.CharField(max_length=255, style= {'input_type': 'password'}, write_only=True)
+    new_password2 = serializers.CharField(max_length=255, style= {'input_type': 'password'}, write_only=True)
+
+    class Meta:
+        fields = ['new_password', 'new_password2']
+    
+    def validate(self, attrs):
+        new_password = attrs.get('new_password')
+        new_password2 = attrs.get('new_password2')
+        user = self.context.get('user')
+        if new_password != new_password2:
+            raise serializers.ValidationError("Passwords must match.")
+        user.set_password(new_password)
+        user.save()
+        return attrs
+
+
         
