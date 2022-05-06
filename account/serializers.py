@@ -19,8 +19,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         }
     
     def validate(self, data):
-        password = data['password']
-        password2 = data['password2']
+        password = data.get('password')
+        password2 = data.get('password2')
         if password != password2:
             raise serializers.ValidationError("Passwords must match.")
         return data
@@ -71,7 +71,7 @@ class SendPassResetMailSerializer(serializers.Serializer):
             uid = urlsafe_base64_encode(force_bytes(user.id))
             token = PasswordResetTokenGenerator().make_token(user)
             # 
-            reset_link = f'{settings.CORS_ALLOWED_ORIGINS[0]}/api/user/reset-pass/{uid}/{token}'
+            reset_link = f'{settings.CORS_ALLOWED_ORIGINS[0]}/api/user/reset-pass/{uid}/{token}/'
             # print(reset_link)
             # Send Mail
             data = {

@@ -27,7 +27,7 @@ class UserRegistrationApiView(APIView):
     renderer_classes = [UserRenderer]
     def post(self, request, format=None):
         serializer = UserRegistrationSerializer(data=request.data)
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         user = serializer.save()
         token = get_tokens_for_user(user)
         return Response({'token': token, 'msg': 'Registration Success..!'}, status=status.HTTP_201_CREATED)
@@ -37,7 +37,7 @@ class UserLoginApiView(APIView):
     renderer_classes = [UserRenderer]
     def post(self, request, format=None):
         serializer = UserLoginSerializer(data=request.data)
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
         user = authenticate(email=email, password=password)
@@ -60,7 +60,7 @@ class UserChangePassApiView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, format=None):
         serializer = UserChangePassSerializer(data=request.data, context={'user': request.user})
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         return Response({'msg': 'Password changed successfully..!'}, status=status.HTTP_200_OK)
 
 
